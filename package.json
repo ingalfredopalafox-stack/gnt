@@ -1,120 +1,15 @@
-const jsonServer = require('json-server');
-const server = jsonServer.create();
-const middlewares = jsonServer.defaults();
-
-// Definimos el estado inicial en memoria para evitar colisiones en el disco de la nube
-const dbInicial = {
-  sensores: {
-    ip_origen: "192.168.100.46",
-    sensors: { temperature: 25.0, humidity: 50.0, soil: 50 },
-    location: { lat: 19.4326, lng: -99.1332 },
-    water_pump: 0,
-    fert_pump: 0,
-    auto: false
+{
+  "name": "grownet-simulador-api",
+  "version": "1.0.0",
+  "description": "Simulador de sensores e IP API para GrowNet",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "json-server": "^0.17.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
-};
-
-// Pasamos el objeto inicial directamente al router
-const router = jsonServer.router(dbInicial);
-
-// Tu bucle original adaptado para la nube: actualiza la memoria interna cada 1 segundo
-setInterval(() => {
-  const temperaturaAleatoria = (20 + Math.random() * 10).toFixed(1);
-  const humedadAleatoria = (40 + Math.random() * 30).toFixed(1);
-  const sueloAleatorio = Math.floor(30 + Math.random() * 40);
-
-  const nuevoJson = {
-    "ip_origen": "192.168.100.46",
-    "sensors": {
-      "temperature": parseFloat(temperaturaAleatoria),
-      "humidity": parseFloat(humedadAleatoria),
-      "soil": sueloAleatorio
-    },
-    "location": {
-      "lat": 19.4326,
-      "lng": -99.1332
-    },
-    "water_pump": Math.round(Math.random()),
-    "fert_pump": 0,
-    "auto": false
-  };
-
-  // Esto actualiza el endpoint /sensores de forma segura y en tiempo real
-  router.db.set('sensores', nuevoJson).write();
-}, 1000);
-
-// Usa los middlewares por defecto
-server.use(middlewares);
-
-// =======================================================
-// NUEVO ENDPOINT: Simulador de IP API Aleatorio Dinámico
-// =======================================================
-server.get('/json/:ip', (req, res) => {
-  const ipConsultada = req.params.ip;
-
-  const ubicacionesSimuladas = [
-    {
-      "country": "Mexico",
-      "countryCode": "MX",
-      "region": "MEX",
-      "regionName": "Estado de México",
-      "city": "Texcoco",
-      "zip": "56100",
-      "lat": 19.5135,
-      "lon": -98.8824,
-      "timezone": "America/Mexico_City",
-      "isp": "Telmex",
-      "org": "Uninet S.A. de C.V.",
-      "as": "AS8151 UNINET"
-    },
-    {
-      "country": "United States",
-      "countryCode": "US",
-      "region": "CA",
-      "regionName": "California",
-      "city": "Mountain View",
-      "zip": "94043",
-      "lat": 37.4220,
-      "lon": -122.0841,
-      "timezone": "America/Los_Angeles",
-      "isp": "Google LLC",
-      "org": "Google LLC",
-      "as": "AS15169 Google LLC"
-    },
-    {
-      "country": "Spain",
-      "countryCode": "ES",
-      "region": "MD",
-      "regionName": "Comunidad de Madrid",
-      "city": "Madrid",
-      "zip": "28001",
-      "lat": 40.4167,
-      "lon": -3.7037,
-      "timezone": "Europe/Madrid",
-      "isp": "Telefonica de Espana",
-      "org": "Movistar",
-      "as": "AS3352 Telefonica"
-    }
-  ];
-
-  const indiceAleatorio = Math.floor(Math.random() * ubicacionesSimuladas.length);
-  const datosUbicacion = ubicacionesSimuladas[indiceAleatorio];
-
-  const ipApiResponse = {
-    "status": "success",
-    ...datosUbicacion,
-    "query": ipConsultada
-  };
-
-  res.json(ipApiResponse);
-});
-
-// Vincula el router de json-server
-server.use(router);
-
-// Obtiene el puerto asignado por la nube (Render) o usa el 3000 local por defecto
-const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor GrowNet corriendo en el puerto ${PORT}`);
-});
+}
