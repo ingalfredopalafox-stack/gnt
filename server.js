@@ -2,7 +2,7 @@ const jsonServer = require('json-server');
 const server = jsonServer.create();
 const middlewares = jsonServer.defaults();
 
-const codigosClima =; // 0=Despejado, 3=Nublado, 80=Lluvia
+const codigosClima = [0, 3, 80]; // 0=Despejado, 3=Nublado, 80=Lluvia
 
 let estadoActuadores = {
   water_pump: 0,
